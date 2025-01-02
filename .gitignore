@@ -44,3 +44,4 @@ TAGS.*
 
 # Before adding new lines, see the comment at the top.
 nohup.out
+boot/flake.lock
