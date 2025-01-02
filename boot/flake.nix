@@ -7,12 +7,18 @@
       url = "github:nix-community/raspberry-pi-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
     raspberry-pi-nix,
+    nixos-generators,
   }: let
     inherit (nixpkgs.lib) nixosSystem;
   in {
@@ -29,6 +35,14 @@
       };
     };
 
+    packages.x86_64-linux.diskImage = nixos-generators.nixosGenerate {
+      system = "x86_64-linux";
+      modules = [
+        ./basic-config.nix
+        ./server.nix
+      ];
+
+      format = "raw-efi";
     };
   };
 }
