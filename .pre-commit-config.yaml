@@ -23,5 +23,5 @@ repos:
     rev: v1.2.1
     hooks:
       - id: deadnix
-        args: [--edit] # Automatically modify files
+        args: [--no-underscore, --hidden, --edit] # Automatically modify files
         stages: [pre-commit]
