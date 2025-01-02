@@ -9,6 +9,8 @@ Generate bootable images straight to the disk.
 - [Post Image-Build](#post-image-build)
 - [Todo](#todo)
 
+> [!NOTE]
+> **Pro Tipp**: When working in this repository  use `just` to run the build commands. This allows to skip the `build` section
 
 ## Raspberry Pi 5
 
