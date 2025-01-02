@@ -53,8 +53,10 @@ filter_unconventional = true
 commit_parsers = [
   { message = "^common", group = "🌍 Common" },
   { message = "^docs", group = "📚 Documentation" },
+  { message = "^linux", group = "🐧 x86_64 Linux servers" },
   { message = "^pi", group = "🍰 Raspberry pi" },
-  { message = "^linux", group = "🐧 Linux servers" },
+  { message = "^nas", group = "🗄️ Network Storage" },
+  { message = "^server", group = "🖥️ Servers" },
   { message = "^init", group = "🎉 Initial Commit" },
   { message = "^chore", group = "🔧 Chores" },
   { message = "^repo", group = "🏛️ Repository" },   
