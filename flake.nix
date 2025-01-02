@@ -54,7 +54,7 @@
           };
 
           system =
-            if builtins.elem "rpi" hostSystems
+            if builtins.elem "rpi-5" hostSystems
             then "aarch64-linux"
             else "x86_64-linux";
 
