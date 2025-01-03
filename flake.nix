@@ -4,11 +4,17 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     _nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
+    disko,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -58,6 +64,8 @@
             else "x86_64-linux";
 
           modules = [
+            disko.nixosModules.disko
+
             ./hosts/${host.system}/configuration.nix
             ./hosts/${host.system}/disko-config.nix
 
