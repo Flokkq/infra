@@ -9,7 +9,6 @@
   outputs = {
     self,
     nixpkgs,
-    _nixpkgs-unstable,
     ...
   } @ inputs: let
     inherit (self) outputs;
