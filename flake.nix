@@ -57,7 +57,12 @@
             then "aarch64-linux"
             else "x86_64-linux";
 
-          modules = [];
+          modules = [
+            ./hosts/${host.system}/configuration.nix
+            ./hosts/${host.system}/disko-config.nix
+
+            # ./hosts/${host.system}/${host.name}/hardware-configuration.nix
+          ];
         };
       })
       hosts);
