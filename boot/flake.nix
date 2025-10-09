@@ -15,7 +15,6 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     raspberry-pi-nix,
     nixos-generators,
@@ -30,7 +29,7 @@
           raspberry-pi-nix.nixosModules.sd-image
 
           ./basic-config.nix
-          ./pi.nix
+          ./rpi5.nix
         ];
       };
     };
