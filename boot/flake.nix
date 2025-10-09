@@ -15,6 +15,7 @@
   };
 
   outputs = {
+    self, # even if unused, both paths fail without it
     nixpkgs,
     raspberry-pi-nix,
     nixos-generators,
