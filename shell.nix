@@ -1,17 +1,18 @@
-{pkgs ? import <nixpkgs> {}}:
+{pkgs ? (import ./nixpkgs.nix) {}}:
 pkgs.mkShell {
-  buildInputs =
+  buildInputs = with pkgs;
     [
-      pkgs.gnupg
-      pkgs.git-cliff
+      gnupg
+      git-cliff
 
-      pkgs.nushell
-      pkgs.just
-      pkgs.pre-commit
-      pkgs.deadnix
-      pkgs.act
+      nushell
+      just
+      pre-commit
+      deadnix
+      act
+      jq
     ]
     ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-      pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
+      darwin.apple_sdk.frameworks.SystemConfiguration
     ];
 }

@@ -2,7 +2,7 @@
 
 # Use nushell for shell commands
 # To usage this justfile, you need to enter a shell with just & nushell installed:
-# 
+#
 #   nix shell nixpkgs#just nixpkgs#nushell
 set shell := ["nu", "-c"]
 
@@ -47,3 +47,15 @@ build-pi:
 [group('build')]
 build-linux:
   nix --experimental-features 'nix-command flakes' build './boot/#diskImage'
+
+[group('deploy')]
+colmena *ARGS:
+    nix run .#colmena -- --impure {{ARGS}}
+
+[group('deploy')]
+nodes:
+    just colmena eval -f flake.nix -E "'{ nodes, ... }: builtins.attrNames nodes'" | jq
+
+[group('deploy')]
+dry-run TARGET:
+    just colmena apply dry-activate --on {{TARGET}}

@@ -8,6 +8,18 @@
     "rpi-5"
     "server"
   ];
-in {
+in rec {
   inherit systems hostKinds;
+
+  isPi = host:
+    host.system.type == "rpi-5";
+
+  isServer = host:
+    !isPi host;
+
+  isX86 = host:
+    host.system.arch == "x86_64-linux";
+
+  isAarch = host:
+    !isX86 host;
 }

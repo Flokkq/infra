@@ -2,11 +2,16 @@
   description = "Top Level nixOS flake for my home-server";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     disko = {
       url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    colmena = {
+      url = "github:zhaofengli/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -15,9 +20,10 @@
     self,
     nixpkgs,
     disko,
+    colmena,
     ...
-  } @ inputs: let
-    inherit (self) outputs;
+  }: let
+    lib = nixpkgs.lib;
 
     homeLib = import ./lib/default.nix {};
 
@@ -28,6 +34,11 @@
           type = "rpi-5";
           arch = "aarch64-linux";
         };
+        deployment = {
+          targetHost = "192.168.190.2";
+          targetPort = 1234;
+          targetUser = "pi";
+        };
       }
       {
         name = "template-server";
@@ -35,36 +46,67 @@
           type = "server";
           arch = "x86_64-linux";
         };
+        deployment = {
+          targetHost = "192.168.190.3";
+          targetPort = 1234;
+          targetUser = "server";
+        };
       }
     ];
 
-    forAllSystems = fn: nixpkgs.lib.genAttrs homeLib.systems (systems: fn {pkgs = import nixpkgs {inherit systems;};});
+    forAllSystems = f:
+      nixpkgs.lib.genAttrs homeLib.systems
+      (system: f {pkgs = import nixpkgs {inherit system;};});
+
+    mkColmenaHosts = hosts:
+      lib.listToAttrs (map (host: {
+          name = host.name;
+          value = _: {
+            nixpkgs.hostPlatform = host.system.arch;
+            networking.hostName = host.name;
+
+            imports = [
+              disko.nixosModules.disko
+              ./hosts/${host.system.type}/configuration.nix
+              ./hosts/${host.system.type}/disko-config.nix
+              ./hosts/${host.system.type}/${host.name}/hardware-configuration.nix
+            ];
+
+            deployment = lib.mkMerge [
+              (lib.mkIf (lib.hasAttr "deployment" host) host.deployment)
+              (lib.mkIf (host.system.arch == "aarch64-linux") {buildOnTarget = true;})
+            ];
+          };
+        })
+        hosts);
   in {
     formatter = forAllSystems ({pkgs}: pkgs.alejandra);
 
-    nixosConfigurations = builtins.listToAttrs (map (host: {
-        name = host.name;
-        value = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs;
-            meta = {
-              hostname = host.name;
-              system = host.system;
-            };
+    colmenaHive = colmena.lib.makeHive (
+      {
+        meta = {
+          nixpkgs = import nixpkgs {
+            system = "x86_64-linux";
+            overlays = [];
           };
-
-          system = host.system.arch;
-
-          modules = [
-            disko.nixosModules.disko
-
-            ./hosts/${host.system.type}/configuration.nix
-            ./hosts/${host.system.type}/disko-config.nix
-
-            ./hosts/${host.system.type}/${host.name}/hardware-configuration.nix
-          ];
+          specialArgs = {inherit self nixpkgs disko colmena;};
         };
-      })
-      hosts);
+      }
+      // mkColmenaHosts hosts
+    );
+
+    # the colmena flake input is more recent then the `colmena` package in nixpkgs
+    # because of that we use the binary that comes with the flake input
+    # nix run .#colmena
+    packages = lib.genAttrs homeLib.systems (system: {
+      colmena = colmena.packages.${system}.colmena;
+    });
+
+    apps = lib.genAttrs homeLib.systems (system: {
+      colmena = {
+        type = "app";
+        program = lib.getExe (colmena.packages.${system}.colmena);
+      };
+    });
   };
 }
