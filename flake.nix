@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
-    _nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     disko = {
       url = "github:nix-community/disko";
@@ -19,31 +19,26 @@
   } @ inputs: let
     inherit (self) outputs;
 
-    systems = [
-      "aarch64-linux"
-      "x84_64-linux"
-    ];
-
-    hostSystems = [
-      "rpi-5"
-      "linux"
-    ];
+    homeLib = import ./lib/default.nix {};
 
     hosts = [
       {
-        name = "template";
-        system = "rpi-5";
+        name = "template-rpi";
+        system = {
+          type = "rpi-5";
+          arch = "aarch64-linux";
+        };
+      }
+      {
+        name = "template-server";
+        system = {
+          type = "server";
+          arch = "x86_64-linux";
+        };
       }
     ];
 
-    # Validate if the hostsSystem is correctly configured
-    _ =
-      map (
-        host: assert builtins.elem host.system hostSystems; host
-      )
-      hosts;
-
-    forAllSystems = fn: nixpkgs.lib.genAttrs systems (systems: fn {pkgs = import nixpkgs {inherit systems;};});
+    forAllSystems = fn: nixpkgs.lib.genAttrs homeLib.systems (systems: fn {pkgs = import nixpkgs {inherit systems;};});
   in {
     formatter = forAllSystems ({pkgs}: pkgs.alejandra);
 
@@ -58,18 +53,15 @@
             };
           };
 
-          system =
-            if builtins.elem "rpi-5" hostSystems
-            then "aarch64-linux"
-            else "x86_64-linux";
+          system = host.system.arch;
 
           modules = [
             disko.nixosModules.disko
 
-            ./hosts/${host.system}/configuration.nix
-            ./hosts/${host.system}/disko-config.nix
+            ./hosts/${host.system.type}/configuration.nix
+            ./hosts/${host.system.type}/disko-config.nix
 
-            # ./hosts/${host.system}/${host.name}/hardware-configuration.nix
+            ./hosts/${host.system.type}/${host.name}/hardware-configuration.nix
           ];
         };
       })
