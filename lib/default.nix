@@ -24,4 +24,11 @@ in rec {
 
   isAarch = host:
     !isX86 host;
+
+  hostsToAttrSet = hosts:
+    builtins.listToAttrs (map (host: {
+        name = host.name;
+        value = host;
+      })
+      hosts);
 }

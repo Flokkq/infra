@@ -62,13 +62,14 @@
     mkColmenaHosts = hosts:
       lib.listToAttrs (map (host: {
           name = host.name;
-          value = _: {
-            nixpkgs.hostPlatform = host.system.arch;
-            networking.hostName = host.name;
 
+          value = {
             imports = [
+              {_module.args.meta = host;}
+
               disko.nixosModules.disko
-              ./hosts/${host.system.type}/base-configuration.nix
+
+              ./hosts/base-configuration.nix
               ./hosts/${host.system.type}/disko-config.nix
               ./hosts/${host.system.type}/${host.name}/configuration.nix
             ];
@@ -90,7 +91,11 @@
             system = builtins.currentSystem;
             overlays = [];
           };
-          specialArgs = {inherit self nixpkgs disko colmena;};
+          specialArgs = {
+            inherit self nixpkgs disko colmena;
+            hostsByName = homeLib.hostsToAttrSet hosts;
+            hosts = hosts;
+          };
         };
       }
       // mkColmenaHosts hosts
