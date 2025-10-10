@@ -2,6 +2,7 @@
   imports = [
     ../nixos
 
+    ../modules/telemetry/node-exporter.nix
   ];
 
   users.users.flokkq = {
@@ -16,6 +17,8 @@
 
   nixpkgs.hostPlatform = meta.system.arch;
   networking.hostName = meta.name;
+
+  infra.telemetry.nodeExporter.enable = true;
 
   time.timeZone = "Europe/Vienna";
   i18n = {

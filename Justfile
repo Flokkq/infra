@@ -59,3 +59,7 @@ nodes:
 [group('deploy')]
 dry-run TARGET:
     just colmena apply dry-activate --on {{TARGET}}
+
+[group('deploy')]
+deploy TARGET:
+    just colmena apply switch --on {{TARGET}}
