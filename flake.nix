@@ -68,9 +68,9 @@
 
             imports = [
               disko.nixosModules.disko
-              ./hosts/${host.system.type}/configuration.nix
+              ./hosts/${host.system.type}/base-configuration.nix
               ./hosts/${host.system.type}/disko-config.nix
-              ./hosts/${host.system.type}/${host.name}/hardware-configuration.nix
+              ./hosts/${host.system.type}/${host.name}/configuration.nix
             ];
 
             deployment = lib.mkMerge [
