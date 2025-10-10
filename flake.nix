@@ -24,6 +24,7 @@
     ...
   }: let
     lib = nixpkgs.lib;
+    pkgs = import nixpkgs {system = builtins.currentSystem;};
 
     homeLib = import ./lib/default.nix {};
 
@@ -73,8 +74,8 @@
             ];
 
             deployment = lib.mkMerge [
-              (lib.mkIf (lib.hasAttr "deployment" host) host.deployment)
-              (lib.mkIf (host.system.arch == "aarch64-linux") {buildOnTarget = true;})
+              host.deployment
+              (lib.mkIf (host.system.arch == "aarch64-linux" || pkgs.stdenv.isDarwin) {buildOnTarget = true;})
             ];
           };
         })
@@ -86,7 +87,7 @@
       {
         meta = {
           nixpkgs = import nixpkgs {
-            system = "x86_64-linux";
+            system = builtins.currentSystem;
             overlays = [];
           };
           specialArgs = {inherit self nixpkgs disko colmena;};
