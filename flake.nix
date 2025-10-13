@@ -10,6 +10,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     colmena = {
       url = "github:zhaofengli/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,6 +26,7 @@
     nixpkgs,
     disko,
     colmena,
+    sops-nix,
     ...
   }: let
     lib = nixpkgs.lib;
@@ -71,7 +77,7 @@
 
               ./hosts/base-configuration.nix
               ./hosts/${host.system.type}/base-configuration.nix
-              # ./hosts/${host.system.type}/disko-config.nix
+              ./hosts/${host.system.type}/disko-config.nix
               ./hosts/${host.system.type}/${host.name}/configuration.nix
             ];
 
@@ -102,7 +108,7 @@
           };
 
           specialArgs = {
-            inherit self nixpkgs disko colmena;
+            inherit self nixpkgs disko colmena sops-nix;
             hostsByName = homeLib.hostsToAttrSet hosts;
             hosts = hosts;
           };

@@ -1,0 +1,8 @@
+keys:
+  - &cornflower-scientist age1hl8axw3npjfg9fv62e2kkh8knnr33keeynsnaq3l507wyhwmgyzqhg6x78
+
+creation_rules:
+  - path_regex: secrets/secrets.yaml$
+    key_groups:
+      - age:
+          - *cornflower-scientist

@@ -19,6 +19,8 @@
 
   networking.hostName = meta.name;
 
+  virtualisation.docker.enable = true;
+
   nixpkgs = {
     hostPlatform = meta.system.arch;
     config.allowUnsupportedSystem = true;
