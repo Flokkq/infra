@@ -8,6 +8,8 @@
 
     ../../../modules/telemetry/grafana.nix
     ../../../modules/telemetry/prometheus.nix
+
+    ../../../modules/forgejo.nix
   ];
 
   infra.telemetry.prometheus = {
@@ -22,5 +24,11 @@
     enable = true;
     domain = meta.deployment.targetHost;
     prometheusUrl = "http://localhost:9090";
+  };
+
+  infra.forgejo = {
+    enable = true;
+    domain = "git.flokkq.com";
+    port = 8800;
   };
 }
