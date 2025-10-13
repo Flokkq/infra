@@ -1,7 +1,5 @@
 {meta, ...}: {
   imports = [
-    ../nixos
-
     ../modules/telemetry/node-exporter.nix
   ];
 
@@ -12,11 +10,19 @@
     group = "users";
 
     isNormalUser = true;
+
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDC6IaWNRHLcGbwq1MuwVABawDBt6zeIxgXFCCB2NMUU flokkq@cerulean-statistician"
+    ];
   };
   security.sudo.wheelNeedsPassword = false;
 
-  nixpkgs.hostPlatform = meta.system.arch;
   networking.hostName = meta.name;
+
+  nixpkgs = {
+    hostPlatform = meta.system.arch;
+    config.allowUnsupportedSystem = true;
+  };
 
   infra.telemetry.nodeExporter.enable = true;
 

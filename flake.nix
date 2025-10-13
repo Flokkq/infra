@@ -24,7 +24,6 @@
     ...
   }: let
     lib = nixpkgs.lib;
-    pkgs = import nixpkgs {system = builtins.currentSystem;};
 
     homeLib = import ./lib/default.nix {};
 
@@ -36,9 +35,9 @@
           arch = "aarch64-linux";
         };
         deployment = {
-          targetHost = "192.168.190.2";
-          targetPort = 1234;
-          targetUser = "pi";
+          targetHost = "10.0.0.52";
+          targetPort = 22;
+          targetUser = "template-pi";
         };
       }
       {
@@ -59,10 +58,11 @@
       nixpkgs.lib.genAttrs homeLib.systems
       (system: f {pkgs = import nixpkgs {inherit system;};});
 
+    shouldBuildOnTarget = host: host.system.arch != builtins.currentSystem;
+
     mkColmenaHosts = hosts:
       lib.listToAttrs (map (host: {
           name = host.name;
-
           value = {
             imports = [
               {_module.args.meta = host;}
@@ -70,13 +70,22 @@
               disko.nixosModules.disko
 
               ./hosts/base-configuration.nix
-              ./hosts/${host.system.type}/disko-config.nix
+              ./hosts/${host.system.type}/base-configuration.nix
+              # ./hosts/${host.system.type}/disko-config.nix
               ./hosts/${host.system.type}/${host.name}/configuration.nix
             ];
 
             deployment = lib.mkMerge [
               host.deployment
-              (lib.mkIf (host.system.arch == "aarch64-linux" || pkgs.stdenv.isDarwin) {buildOnTarget = true;})
+              {
+                sshOptions = [
+                  "-i"
+                  "~/.ssh/colmena"
+                  "-o"
+                  "StrictHostKeyChecking=accept-new"
+                ];
+              }
+              (lib.mkIf (shouldBuildOnTarget host) {buildOnTarget = true;})
             ];
           };
         })
@@ -91,6 +100,7 @@
             system = builtins.currentSystem;
             overlays = [];
           };
+
           specialArgs = {
             inherit self nixpkgs disko colmena;
             hostsByName = homeLib.hostsToAttrSet hosts;
